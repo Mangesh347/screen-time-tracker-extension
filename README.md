@@ -4,7 +4,7 @@
 
 A Chrome extension that shows where your browsing time goes, and helps you take it back. Material You design, private by default.
 
-**Install:** [Chrome Web Store](CHROME_WEB_STORE_LINK) · about 1,000 users
+**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/screen-time-tracker/llfciomelolhkmnepbnjkiokpinfgdmf) · about 1,000 users
 
 ## Features
 - Time per website, today and over the week, with clear charts
