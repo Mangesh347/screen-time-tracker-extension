@@ -1,0 +1,1092 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="auto" data-mode="light" data-m3="expressive" data-surface="dashboard">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Screen Time Tracker — Dashboard</title>
+<link rel="stylesheet" href="../src/theme.css"/>
+<link rel="stylesheet" href="../src/motion.css"/>
+<link rel="stylesheet" href="../src/m3-expressive.css"/>
+<link rel="stylesheet" href="../src/visual-editorial.css"/>
+<link rel="stylesheet" href="../src/overview-premium.css"/>
+<link rel="stylesheet" href="../src/analytics-premium.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+.section{display:none}.section.active{display:block;animation:dash-fade .28s var(--m3-ease) both}
+@keyframes dash-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1000px){.g4,.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.g4,.g3,.g2{grid-template-columns:1fr}}
+.ring-pos{position:relative;width:140px;height:140px}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pie-legend{display:flex;flex-direction:column;gap:6px}
+.leg-item{display:flex;align-items:center;gap:7px}
+.leg-dot{width:9px;height:9px;border-radius:50%}
+.leg-name{flex:1;text-transform:capitalize;color:var(--t2);font-size:12px}
+.leg-val{font-family:var(--font-mono),monospace;font-size:11px;font-weight:600}
+.hmap-grid{display:grid;grid-template-columns:38px repeat(24,1fr);gap:3px;min-width:600px}
+.hm-lbl{font-size:9px;color:var(--t3);display:flex;align-items:center;justify-content:flex-end;padding-right:4px}
+.hm-cell{aspect-ratio:1;border-radius:6px}
+.plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch}
+@media(max-width:1100px){.plan-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.plan-grid{grid-template-columns:1fr}}
+@keyframes planEnter{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes planBadgePulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--m3-primary) 45%,transparent)}50%{box-shadow:0 0 0 8px transparent}}
+.plan-card{position:relative;padding:22px 20px;border-radius:28px;background:var(--c2);border:1px solid var(--c4);display:flex;flex-direction:column;gap:10px;overflow:hidden;animation:planEnter .45s cubic-bezier(.2,0,0,1) both;transition:transform .2s ease-out,box-shadow .2s ease-out,border-color .2s ease-out}
+.plan-card:nth-child(1){animation-delay:0ms}
+.plan-card:nth-child(2){animation-delay:55ms}
+.plan-card:nth-child(3){animation-delay:110ms}
+.plan-card:nth-child(4){animation-delay:165ms}
+.plan-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px color-mix(in srgb,var(--m3-primary) 14%,transparent)}
+.plan-card:focus-within{outline:2px solid var(--m3-primary);outline-offset:2px}
+.plan-card.feat{border-color:var(--m3-primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--m3-primary) 28%,transparent),0 8px 24px color-mix(in srgb,var(--m3-primary) 16%,transparent);background:linear-gradient(165deg,color-mix(in srgb,var(--m3-primary-container) 55%,var(--c2)),var(--c2))}
+.plan-card.plan-free{background:var(--c3)}
+.plan-badge{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--m3-primary);color:var(--m3-on-primary);letter-spacing:.02em}
+.plan-badge.pulse{animation:planBadgePulse 2.2s ease-in-out infinite}
+.plan-name{font-size:15px;font-weight:700;color:var(--t1);padding-right:72px;line-height:1.25}
+.plan-price-row{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px}
+.plan-price-usd{font-family:var(--font-mono),Roboto Mono,monospace;font-size:28px;font-weight:600;color:var(--m3-primary);line-height:1.1}
+.plan-price-usd small{font-size:12px;font-weight:500;color:var(--t3);margin-left:2px}
+.plan-price-inr{font-size:13px;font-weight:600;color:var(--t2)}
+.plan-billing{font-size:11px;color:var(--t3);line-height:1.35;min-height:2.6em}
+.plan-savings{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--m3-primary);background:var(--m3-primary-container);padding:4px 10px;border-radius:999px;width:fit-content}
+.plan-feats{list-style:none;margin:4px 0 12px;padding:0;flex:1}
+.plan-feats li{font-size:12px;color:var(--t2);padding:7px 0 7px 18px;position:relative;border-bottom:1px solid var(--c4)}
+.plan-feats li:last-child{border-bottom:none}
+.plan-feats li:before{content:'';position:absolute;left:0;top:12px;width:8px;height:8px;border-radius:50%;background:var(--m3-primary)}
+.plan-buy,.plan-cta-free{width:100%;margin-top:auto}
+.pro-fx-note{font-size:11px;color:var(--t3);margin:0 0 12px;line-height:1.4}
+.pro-compare-details{margin-top:14px}
+.pro-compare-details>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--t1);list-style:none;padding:4px 0}
+.pro-compare-details>summary::-webkit-details-marker{display:none}
+.pro-restore-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.pro-pay-hint{font-size:12px;color:var(--t2);margin:0 0 12px;line-height:1.45}
+.pro-pay-providers{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px}
+.pro-pay-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:14px;border:1.5px solid var(--c4);background:#fff;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease,transform .15s ease;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.pro-pay-btn:hover{border-color:color-mix(in srgb,var(--m3-primary) 40%,var(--c4));transform:translateY(-1px)}
+.pro-pay-btn.active{border-color:var(--m3-primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--m3-primary) 28%,transparent),0 2px 8px rgba(0,0,0,.08)}
+.pro-pay-btn img{display:block;height:24px;width:auto;max-width:120px;object-fit:contain}
+.pro-pay-btn[data-provider="paypal"] img{height:22px}
+.pro-pay-btn[data-provider="razorpay"] img{height:22px}
+.pro-pay-secured{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:var(--t3);font-weight:600}
+.pro-pay-secured .pay-chip{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:10px;background:#fff;border:1px solid var(--c4);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.pro-pay-secured .pay-chip img{height:16px;width:auto;object-fit:contain;display:block}
+.plan-pay-logos{display:inline-flex;align-items:center;gap:6px;margin-top:6px}
+.plan-pay-logos .pay-chip{display:inline-flex;align-items:center;justify-content:center;padding:5px 8px;border-radius:8px;background:#fff;border:1px solid color-mix(in srgb,var(--c4) 80%,transparent)}
+.plan-pay-logos .pay-chip img{height:13px;width:auto;object-fit:contain;display:block}
+@media (prefers-reduced-motion:reduce){
+  .plan-card{animation:none!important;transition:none!important}
+  .plan-card:hover{transform:none;box-shadow:none}
+  .plan-badge.pulse{animation:none!important}
+}
+.bento-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:700px){.bento-grid{grid-template-columns:1fr}}
+.bento-tile{position:relative;overflow:hidden;border-radius:28px;padding:20px 18px;min-height:110px;background:var(--c2);border:1px solid var(--c4)}
+.bento-tile.tone-primary{background:linear-gradient(165deg,var(--m3-primary-container),var(--c2))}
+.bento-tile.tone-secondary{background:linear-gradient(165deg,var(--m3-secondary-container,var(--c3)),var(--c2))}
+.bento-tile.tone-tertiary{background:var(--c3)}
+.bento-val{font-family:var(--font-mono),monospace;font-size:28px;font-weight:600;color:var(--m3-primary);line-height:1.1}
+.bento-lbl{font-size:12px;color:var(--t2);margin-top:6px;font-weight:600}
+.bento-wave{display:none!important}
+.ana-disclose{padding:16px 18px}
+.ana-disclose>summary{outline:none}
+.ana-disclose>summary::-webkit-details-marker{display:none}
+.ana-disclose[open]>summary{margin-bottom:4px}
+.hb-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:36px 16px;text-align:center;color:var(--t2)}
+.hb-empty p{font-weight:700;font-size:14px;margin:0;color:var(--t1)}
+.hb-empty span{font-size:12px;color:var(--t3);max-width:280px;line-height:1.4}
+.hb-empty .btn{margin-top:8px;min-width:140px}
+.hb-empty-blob{width:48px;height:48px;margin-bottom:4px}
+.hb-empty-inline{font-size:12px;color:var(--t3);padding:10px 0;display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.hb-empty-inline .btn{width:100%}
+.hb-empty-ring{min-height:240px}
+.hb-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
+.hb-head-actions .btn{flex-shrink:0}
+.hb-max-hint{font-size:11px;font-weight:600;color:var(--t3);display:none}
+.hb-max-hint.show{display:inline}
+.hb-grid-tip{font-size:12px;color:var(--t3);margin:0 0 12px;line-height:1.4}
+.hb-add-habit:disabled{opacity:.45;cursor:not-allowed}
+.hb-num{width:18px;font-size:11px;font-weight:700;color:var(--t3);text-align:center}
+.hb-swatch.scallop{border-radius:40% 60% 55% 45%/45% 40% 60% 55%}
+.hb-center-blob{filter:drop-shadow(0 2px 6px color-mix(in srgb,var(--m3-primary) 20%,transparent))}
+.hb-sum-table{display:flex;flex-direction:column;gap:6px;overflow-x:auto}
+.hb-sum-row{display:grid;grid-template-columns:110px repeat(auto-fit,minmax(44px,1fr));gap:6px;align-items:center;min-width:min-content}
+.hb-sum-row.head .hb-sum-cell{font-size:10px;font-weight:700;color:var(--t3);text-align:center}
+.hb-sum-lab{font-size:12px;font-weight:600;color:var(--t2)}
+.hb-sum-cell{text-align:center}
+.hb-sum-cell.done{font-family:var(--font-mono),monospace;font-weight:700;font-size:14px;color:var(--m3-primary);padding:8px;border-radius:14px;background:var(--c3)}
+.hb-sum-cell.done.hit{background:var(--m3-primary-container)}
+.hb-target{width:100%;max-width:56px;padding:6px 4px;border-radius:12px;border:1px solid var(--c4);background:var(--c2);color:var(--t1);text-align:center;font-family:var(--font-mono),monospace;font-size:12px}
+.hb-g-cell{border-radius:40% 60% 55% 45%/45% 40% 60% 55%!important}
+.lb-row,.feed-row,.notif-row,.friend-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--c3);margin-bottom:8px;border:1px solid transparent}
+.lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--m3-tonal);color:var(--m3-primary)}
+.lb-row.top1 .lb-rank{background:var(--m3-primary);color:var(--m3-on-primary)}
+.notif-unread{border-color:var(--m3-primary);background:var(--m3-primary-container)}
+.profile-hero{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:18px;border-radius:28px;background:linear-gradient(135deg,var(--m3-primary-container),var(--c2))}
+.avatar-lg{width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--c4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--m3-primary);flex-shrink:0}
+/* Profile — Instagram-like (theme tokens, matches Community) */
+.pf-ig{display:flex;flex-direction:column;gap:0;max-width:640px}
+.pf-ig-head{display:flex;gap:20px;align-items:flex-start;padding:8px 4px 16px}
+.pf-ig-av{width:88px;height:88px;border-radius:50%;overflow:hidden;background:var(--c4);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:var(--m3-primary);flex-shrink:0;border:2px solid color-mix(in srgb,var(--c4) 80%,transparent)}
+.pf-ig-av img{width:100%;height:100%;object-fit:cover}
+.pf-av-btn{position:relative;padding:0;border:none;background:transparent;cursor:pointer;border-radius:50%;flex-shrink:0}
+.pf-av-btn .pf-ig-av{pointer-events:none}
+.pf-av-edit{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);font-size:10px;font-weight:700;letter-spacing:.02em;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--m3-primary) 88%,#000);color:var(--m3-on-primary,#fff);opacity:.95}
+.pf-ig-meta{flex:1;min-width:0;padding-top:4px}
+.pf-ig-name{font-size:20px;font-weight:700;line-height:1.2;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pf-ig-handle{font-size:13px;color:var(--t2);margin-top:4px}
+.pf-ig-stats{display:flex;gap:0;margin-top:14px;flex-wrap:wrap}
+.pf-ig-stats .stat-btn,.pf-ig-stats .stat-static{min-width:72px;padding:4px 12px 4px 0;text-align:left}
+.pf-ig-stats strong{display:block;font-size:17px;font-family:var(--font-mono),monospace;color:var(--t1);font-weight:800}
+.pf-ig-stats span{font-size:12px;color:var(--t3);font-weight:500}
+.pf-ig-stats .stat-btn:hover strong{color:var(--m3-primary)}
+.pf-ig-bio{padding:0 4px 12px;font-size:13px;line-height:1.45;color:var(--t1);white-space:pre-wrap}
+.pf-ig-bio.empty{color:var(--t3)}
+.pf-ig-actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 4px 16px}
+.pf-ig-actions .btn{width:auto;min-width:110px;padding:9px 16px;font-size:13px;font-weight:700}
+.pf-ig-actions .btn.grow{flex:1;min-width:120px}
+.pf-ig-score{display:flex;gap:16px;flex-wrap:wrap;padding:10px 12px;margin:0 0 16px;border-radius:16px;background:var(--c3);border:1px solid color-mix(in srgb,var(--c4) 60%,transparent)}
+.pf-ig-score .sk{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
+.pf-ig-score .sv{font-family:var(--font-mono),monospace;font-weight:700;font-size:14px;color:var(--m3-primary)}
+.pf-ig-section{border-top:1px solid color-mix(in srgb,var(--c4) 75%,transparent);padding-top:12px}
+.pf-ig-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid color-mix(in srgb,var(--c4) 70%,transparent)}
+.pf-ig-tab{appearance:none;border:0;background:transparent;color:var(--t3);font:inherit;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.pf-ig-tab.on{color:var(--t1);border-bottom-color:var(--m3-primary)}
+.pf-ig-tab:focus-visible{outline:2px solid var(--m3-primary);outline-offset:2px}
+.pf-ig-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+.pf-ig-cell{aspect-ratio:1;padding:10px;background:var(--c3);border:0;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;text-align:left;font:inherit;color:inherit;cursor:default;min-height:0}
+.pf-ig-cell .body{font-size:12px;line-height:1.35;color:var(--t1);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+.pf-ig-cell .meta{font-size:10px;color:var(--t3);margin-top:6px;flex-shrink:0}
+.pf-ig-cell .meta .views{display:inline-flex;align-items:center;gap:3px;vertical-align:middle}
+.pf-ig-cell .meta .feed-view-ico{flex-shrink:0;opacity:.85}
+.pf-ig-list-panel{margin-top:8px}
+.pf-ig-edit{margin-top:8px;padding:14px;border-radius:20px;background:var(--c3);border:1px solid color-mix(in srgb,var(--c4) 55%,transparent)}
+.pf-ig-edit[hidden]{display:none!important}
+.pf-ig-edit .card-hd{margin-bottom:10px}
+.pf-ig-private-hint{display:flex;align-items:center;justify-content:center;gap:8px;padding:36px 16px;text-align:center;color:var(--t2);font-size:13px;line-height:1.45;flex-direction:column}
+@media (max-width:520px){
+  .pf-ig-head{gap:14px}
+  .pf-ig-av{width:72px;height:72px;font-size:26px}
+  .pf-ig-stats .stat-btn,.pf-ig-stats .stat-static{min-width:56px;padding-right:8px}
+  .pf-ig-grid{gap:2px}
+  .pf-ig-cell{padding:8px}
+  .pf-ig-cell .body{-webkit-line-clamp:4;font-size:11px}
+}
+html[data-visual="editorial"] .pf-ig-av{border-radius:6px}
+html[data-visual="editorial"] .pf-ig-cell{border-radius:2px}
+html[data-visual="editorial"] .pf-ig-edit{border-radius:4px}
+html[data-visual="editorial"] .pf-ig-score{border-radius:4px}
+html[data-visual="minimal"] .pf-ig-av{border-radius:0}
+html[data-visual="minimal"] .pf-ig-cell{border-radius:0}
+html[data-visual="minimal"] .pf-ig-edit{border-radius:0}
+html[data-visual="minimal"] .pf-ig-score{border-radius:0}
+html[data-visual="minimal"] .pf-ig-actions .btn{border-radius:0}
+.lb-row.you{border-color:var(--m3-primary);background:var(--m3-primary-container)}
+.lb-row,.feed-row,.explore-card{cursor:pointer;transition:transform .18s var(--m3-spring),background .2s}
+.lb-row:hover,.feed-row:hover,.explore-card:hover{transform:translateY(-1px);background:var(--m3-primary-container)}
+.lb-wrap{position:relative}
+.lb-wrap.is-guest .lb-body{filter:blur(9px);opacity:.55;pointer-events:none;user-select:none}
+.lb-gate-overlay{display:none;position:absolute;inset:0;z-index:6;align-items:center;justify-content:center;padding:20px;background:color-mix(in srgb,var(--c0) 35%,transparent)}
+.lb-wrap.is-guest .lb-gate-overlay{display:flex}
+.lb-gate-card{max-width:360px;width:100%;padding:22px 20px;border-radius:24px;background:var(--c2);border:1px solid var(--c4);box-shadow:0 16px 48px rgba(0,0,0,.18);text-align:center}
+.lb-gate-card .card-hd{margin-bottom:6px}
+.lb-gate-card p{font-size:13px;color:var(--t2);margin:0 0 14px;line-height:1.45}
+.lb-metrics{display:flex;gap:10px;align-items:center}
+.lb-metric{text-align:center;min-width:52px}
+.lb-metric-val{display:block;font-family:var(--font-mono),monospace;font-weight:700;font-size:13px;color:var(--m3-primary)}
+.lb-metric-key{display:block;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.lb-alone-hint{font-size:12px;color:var(--t3);padding:8px 4px 12px}
+.lb-criteria{font-size:11px;color:var(--t3);margin:8px 0 4px;line-height:1.4}
+@media (prefers-reduced-motion:reduce){.lb-wrap.is-guest .lb-body{filter:blur(6px)}}
+.cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block}
+.cat-track{overflow:hidden;border-radius:999px}
+.explore-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.explore-tile{padding:14px;border-radius:22px;background:var(--c3);border:1px solid transparent;cursor:pointer;transition:transform .18s var(--m3-spring),border-color .2s,background .2s;text-align:left;font:inherit;color:inherit;width:100%}
+.explore-tile:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--m3-primary) 35%,transparent);background:var(--m3-primary-container)}
+.explore-tile .handle{font-weight:700;font-size:14px}
+.explore-tile .meta{font-size:11px;color:var(--t3);margin-top:4px}
+.privacy-lock{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--m3-secondary);background:var(--m3-secondary-container);padding:3px 8px;border-radius:999px}
+.profile-sheet{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;background:rgba(20,16,30,.45);backdrop-filter:blur(6px);padding:16px}
+.profile-sheet.open{display:flex}
+.profile-sheet-card{width:min(560px,100%);max-height:min(88vh,820px);overflow:auto;background:var(--c2);border-radius:28px 28px 20px 20px;padding:20px;box-shadow:0 24px 64px rgba(0,0,0,.28)}
+.profile-sheet-head{display:flex;gap:14px;align-items:flex-start}
+.profile-stats{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.profile-stats div{text-align:center;min-width:64px}
+.profile-stats strong{display:block;font-size:16px;font-family:var(--font-mono),monospace;color:var(--m3-primary)}
+.profile-stats span{font-size:11px;color:var(--t3)}
+.thought-only-note{font-size:11px;color:var(--t3);margin-top:8px;line-height:1.4}
+/* Community — Instagram-like layout (theme tokens only) */
+.social-top{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.social-top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.social-top .pg-title{margin-bottom:2px}
+.social-signed{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);min-height:20px}
+.social-signed .avatar-lg{width:22px;height:22px;font-size:10px}
+.social-segs{display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--c3);border:1px solid color-mix(in srgb,var(--c4) 70%,transparent);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.social-segs::-webkit-scrollbar{display:none}
+.social-seg{appearance:none;border:0;background:transparent;color:var(--t2);font:inherit;font-size:12px;font-weight:700;padding:8px 14px;border-radius:12px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .18s ease,color .18s ease}
+.social-seg:hover{color:var(--t1);background:color-mix(in srgb,var(--c2) 70%,transparent)}
+.social-seg:focus-visible{outline:2px solid var(--m3-primary);outline-offset:2px}
+.social-seg.on{background:var(--c2);color:var(--t1);box-shadow:0 1px 0 color-mix(in srgb,var(--c4) 80%,transparent)}
+.social-seg-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--m3-primary);color:var(--m3-on-primary);font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.social-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+@media (min-width:980px){
+  .social-layout.has-rail{grid-template-columns:minmax(0,1fr) minmax(240px,300px)}
+  .social-rail{display:block}
+}
+.social-rail{display:none}
+.social-rail .card-hd{margin-bottom:10px}
+.social-pane[hidden]{display:none!important}
+.social-composer{padding:14px}
+.social-composer-row{display:flex;gap:12px;align-items:flex-start}
+.social-composer .task-inp{min-height:72px;border-radius:16px;resize:vertical;padding:12px;flex:1}
+.social-composer-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap}
+.social-composer-foot .btn{width:auto;min-width:110px;padding:10px 18px}
+.social-empty{padding:28px 16px;text-align:center;color:var(--t3);font-size:13px;line-height:1.45}
+.social-empty strong{display:block;color:var(--t2);font-size:14px;margin-bottom:4px}
+.feed-stack{display:flex;flex-direction:column;gap:0}
+.feed-stack .feed-post{border-radius:0;border:0;border-bottom:1px solid color-mix(in srgb,var(--c4) 75%,transparent);background:transparent;margin:0;padding:14px 4px}
+.feed-stack .feed-post:hover{transform:none;background:color-mix(in srgb,var(--c3) 55%,transparent)}
+.req-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid color-mix(in srgb,var(--c4) 70%,transparent)}
+.req-row:last-child{border-bottom:0}
+.req-meta{flex:1;min-width:0}
+.req-meta .name{font-weight:700;font-size:13px;cursor:pointer}
+.req-meta .name:hover{color:var(--m3-primary)}
+.req-meta .sub{font-size:11px;color:var(--t3);margin-top:2px}
+.req-actions{display:flex;gap:8px;flex-shrink:0}
+.req-actions .btn{width:auto;padding:8px 14px;font-size:12px;font-weight:700}
+.discover-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:18px;background:var(--c3);margin-bottom:8px}
+.discover-main{appearance:none;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-align:left;padding:0}
+.discover-main:hover .handle{color:var(--m3-primary)}
+.discover-main .handle{font-weight:700;font-size:13px}
+.discover-main .meta{font-size:11px;color:var(--t3);margin-top:2px}
+.discover-follow{width:auto;padding:8px 14px;font-size:12px;font-weight:700;flex-shrink:0}
+.inbox-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 8px;border:0;border-bottom:1px solid color-mix(in srgb,var(--c4) 70%,transparent);background:transparent;color:inherit;font:inherit;cursor:pointer;text-align:left;border-radius:0}
+.inbox-row:hover{background:color-mix(in srgb,var(--c3) 60%,transparent)}
+.inbox-row .preview{font-size:12px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inbox-row .when{font-size:10px;color:var(--t3);flex-shrink:0}
+.social-search-bar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.social-search-bar .task-inp{flex:1;min-width:0}
+.social-search-btn{
+  width:44px;height:44px;flex:0 0 44px;border-radius:22px;border:none;
+  background:var(--m3-primary);color:var(--m3-on-primary);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;padding:0;
+  box-shadow:0 4px 12px color-mix(in srgb,var(--m3-primary) 30%,transparent);
+  transition:transform .2s cubic-bezier(.2,0,0,1),opacity .15s ease;
+}
+.social-search-btn:hover{transform:scale(1.06)}
+.social-search-btn:active{transform:scale(.94)}
+.social-search-btn:disabled{opacity:.55;cursor:wait;transform:none}
+.social-search-btn svg{display:block;flex-shrink:0}
+.social-search-btn.is-loading svg{animation:socialSearchSpin .7s linear infinite}
+@keyframes socialSearchSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.social-search-btn.is-loading svg{animation:none}}
+
+.chat-compose{
+  display:flex;gap:8px;align-items:flex-end;margin-top:10px;
+  padding:8px;border-radius:20px;background:var(--c2);
+  border:1px solid color-mix(in srgb,var(--c4) 55%,transparent);
+}
+.chat-compose .chat-msg-inp{
+  flex:1;min-width:0;border:0;background:transparent;box-shadow:none;
+  padding:10px 8px;min-height:44px;resize:none;font:inherit;color:var(--t1);
+  max-height:120px;line-height:1.4;
+}
+.chat-compose .chat-msg-inp:focus{outline:none;box-shadow:none}
+.chat-send-btn{
+  width:44px;height:44px;flex:0 0 44px;border-radius:22px;border:none;
+  background:var(--m3-primary);color:var(--m3-on-primary);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;padding:0;
+  transition:transform .15s ease,opacity .15s ease,background .15s ease;
+}
+.chat-send-btn:hover:not(:disabled){transform:scale(1.05)}
+.chat-send-btn:disabled{opacity:.5;cursor:not-allowed}
+.chat-send-btn.is-sending{opacity:.7}
+.msg-bubble.pending{opacity:.72}
+.msg-bubble.pending .msg-meta{font-style:italic}
+.msg-thread{gap:10px;padding:8px 4px 12px}
+html[data-visual="editorial"] .social-segs{border-radius:4px;background:transparent;border-color:var(--c4)}
+html[data-visual="editorial"] .social-seg{border-radius:2px}
+html[data-visual="editorial"] .social-seg.on{border:1px solid var(--t1);background:transparent}
+html[data-visual="minimal"] .social-segs{border-radius:0;background:var(--c2);border-color:var(--c4)}
+html[data-visual="minimal"] .social-seg{border-radius:0}
+html[data-visual="minimal"] .social-seg.on{background:var(--t1);color:var(--c0)}
+html[data-visual="minimal"] .social-seg-badge{border-radius:0}
+.stat-btn{appearance:none;border:0;background:transparent;color:inherit;cursor:pointer;padding:0;text-align:center;min-width:64px;font:inherit}
+.stat-btn:hover strong{color:var(--m3-primary)}
+.stat-btn strong{display:block;font-size:16px;font-family:var(--font-mono),monospace;color:var(--m3-primary)}
+.stat-btn span{font-size:11px;color:var(--t3)}
+.feed-author{appearance:none;border:0;background:transparent;color:inherit;font-weight:700;font-size:12px;cursor:pointer;padding:0;font:inherit}
+.feed-author:hover{color:var(--m3-primary)}
+.feed-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.feed-act{appearance:none;border:0;background:var(--c2);color:var(--t2);font-size:11px;padding:4px 10px;border-radius:999px;cursor:pointer;font:inherit}
+.feed-act.on{color:var(--m3-primary);background:var(--m3-primary-container)}
+.feed-act.danger{color:var(--danger, #c44)}
+.feed-act:hover{background:var(--m3-primary-container)}
+.feed-act.feed-views{cursor:default;pointer-events:none;display:inline-flex;align-items:center;gap:4px;opacity:.9}
+.feed-act.feed-views:hover{background:var(--c2)}
+.feed-view-ico{display:inline-block;vertical-align:-1px;flex-shrink:0}
+.feed-comments{margin-top:8px;padding:8px;border-radius:14px;background:var(--c2)}
+.comment-row{font-size:12px;padding:6px 0;border-bottom:1px solid color-mix(in srgb,var(--c4) 60%,transparent)}
+.comment-row:last-child{border-bottom:0}
+.char-count{font-size:11px;color:var(--t3);text-align:right;margin-top:6px}
+.char-count.near-limit{color:var(--m3-primary);font-weight:600}
+.msg-thread{max-height:min(48vh,420px);overflow:auto;display:flex;flex-direction:column;gap:8px;padding:4px}
+.msg-bubble{align-self:flex-start;max-width:85%;padding:10px 12px;border-radius:16px 16px 16px 6px;background:var(--c3);font-size:13px;line-height:1.4}
+.msg-bubble.mine{align-self:flex-end;border-radius:16px 16px 6px 16px;background:var(--m3-primary-container);color:var(--t1)}
+.msg-bubble.system{align-self:center;max-width:92%;text-align:center;background:color-mix(in srgb,var(--m3-secondary-container) 70%,var(--c3));color:var(--t2);border-radius:14px;font-size:12px;line-height:1.45}
+.msg-bubble.system .msg-meta{color:var(--m3-secondary);font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.msg-meta{font-size:10px;color:var(--t3);margin-top:4px}
+.chat-hub{display:grid;grid-template-columns:minmax(180px,240px) minmax(0,1fr);gap:12px;min-height:min(52vh,460px)}
+.chat-conv-list{display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:min(52vh,460px);padding-right:2px}
+.chat-conv-item{appearance:none;border:1px solid transparent;background:var(--c3);color:inherit;font:inherit;text-align:left;border-radius:16px;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%;transition:border-color .18s,background .18s}
+.chat-conv-item:hover,.chat-conv-item.active{border-color:color-mix(in srgb,var(--m3-primary) 40%,transparent);background:var(--m3-primary-container)}
+.chat-conv-item .name{font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
+.chat-conv-item .preview{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-unread{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--m3-primary);color:var(--c0);font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.chat-pane{display:flex;flex-direction:column;min-height:min(52vh,460px);border-radius:20px;background:color-mix(in srgb,var(--c3) 70%,var(--c2));padding:12px;border:1px solid color-mix(in srgb,var(--c4) 55%,transparent)}
+.chat-pane-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid color-mix(in srgb,var(--c4) 55%,transparent)}
+.chat-pane .msg-thread{flex:1;max-height:none;min-height:220px}
+.chat-empty{padding:28px 16px;text-align:center;color:var(--t3);font-size:13px;line-height:1.45}
+.profile-sheet-card.chat-sheet{width:min(720px,100%);max-height:min(90vh,860px)}
+@media (max-width:720px){.chat-hub{grid-template-columns:1fr;min-height:0}.chat-conv-list{max-height:160px;flex-direction:row;overflow-x:auto}.chat-conv-item{min-width:200px}}
+.habit-today{display:flex;flex-direction:column;gap:14px}
+.habit-metric-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
+.habit-metric-top strong{flex:1}
+.habit-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.habit-dot.sleep,.habit-legend .sleep{background:#3B82F6}
+.habit-dot.mood,.habit-legend .mood{background:#EC4899}
+.habit-dot.stress,.habit-legend .stress{background:#F59E0B}
+.habit-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--t3);font-weight:600}
+.habit-legend span{display:inline-flex;align-items:center;gap:6px}
+.habit-legend i{width:8px;height:8px;border-radius:50%}
+.chart-box canvas{animation:chartWaveIn .7s cubic-bezier(.05,.7,.1,1) both}
+@keyframes chartWaveIn{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.chart-box canvas{animation:none}}
+.habit-today{display:flex;flex-direction:column;gap:14px}
+.habit-metric-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
+.habit-metric-top strong{flex:1}
+.habit-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.habit-dot.sleep,.habit-legend .habit-dot.sleep{background:#3B82F6}
+.habit-dot.mood,.habit-legend .habit-dot.mood{background:#EC4899}
+.habit-dot.stress,.habit-legend .habit-dot.stress{background:#F59E0B}
+.habit-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--t3);font-weight:600}
+.habit-legend span{display:inline-flex;align-items:center;gap:6px}
+.habit-legend i{width:8px;height:8px;border-radius:50%}
+.chart-box canvas{animation:chartWaveIn .7s cubic-bezier(.05,.7,.1,1) both}
+@keyframes chartWaveIn{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+.chart-shell canvas{animation:chartReveal .55s cubic-bezier(.05,.7,.1,1) both}
+.chart-shell.anim-spin canvas{animation:chartSpinIn .85s cubic-bezier(.2,.8,.2,1) both}
+.chart-shell.anim-rise canvas{animation:chartRiseIn .7s cubic-bezier(.05,.7,.1,1) both}
+@keyframes chartReveal{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes chartSpinIn{from{opacity:.2;transform:scale(.86) rotate(-12deg)}to{opacity:1;transform:none}}
+@keyframes chartRiseIn{from{opacity:.25;transform:translateY(14px) scaleY(.92);transform-origin:bottom}to{opacity:1;transform:none}}
+.site-bar-f{transition:width .65s cubic-bezier(.05,.7,.1,1)!important}
+.site-row,.cat-bar-row,.leg-item{animation:rowFade .45s cubic-bezier(.05,.7,.1,1) both}
+.site-row:nth-child(1),.cat-bar-row:nth-child(1),.leg-item:nth-child(1){animation-delay:0ms}
+.site-row:nth-child(2),.cat-bar-row:nth-child(2),.leg-item:nth-child(2){animation-delay:40ms}
+.site-row:nth-child(3),.cat-bar-row:nth-child(3),.leg-item:nth-child(3){animation-delay:80ms}
+.site-row:nth-child(4),.cat-bar-row:nth-child(4),.leg-item:nth-child(4){animation-delay:120ms}
+.site-row:nth-child(5),.cat-bar-row:nth-child(5),.leg-item:nth-child(5){animation-delay:160ms}
+.site-row:nth-child(n+6),.cat-bar-row:nth-child(n+6),.leg-item:nth-child(n+6){animation-delay:200ms}
+@keyframes rowFade{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.hm-cell{animation:heatPop .4s cubic-bezier(.05,.7,.1,1) both;animation-delay:var(--delay,0ms)}
+@keyframes heatPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.petal-fill{animation:petalBloom .8s cubic-bezier(.05,.7,.1,1) both}
+.petal-fill:nth-of-type(2){animation-delay:40ms}
+.petal-fill:nth-of-type(4){animation-delay:80ms}
+.petal-fill:nth-of-type(6){animation-delay:120ms}
+.petal-fill:nth-of-type(8){animation-delay:160ms}
+@keyframes petalBloom{from{opacity:0;transform-origin:center;transform:scale(.4)}to{opacity:.88;transform:none}}
+.bento-tile{animation:bentoIn .55s cubic-bezier(.05,.7,.1,1) both}
+.bento-tile:nth-child(1){animation-delay:0ms}.bento-tile:nth-child(2){animation-delay:50ms}
+.bento-tile:nth-child(3){animation-delay:100ms}.bento-tile:nth-child(4){animation-delay:150ms}
+@keyframes bentoIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hb-ring-layout{display:grid;grid-template-columns:minmax(240px,1fr) minmax(180px,280px);gap:16px;align-items:start}
+@media(max-width:900px){.hb-ring-layout{grid-template-columns:1fr}}
+.hb-ring-host{min-height:280px;display:flex;align-items:center;justify-content:center}
+.hb-ring-svg{max-width:320px;max-height:320px}
+.hb-day-num{font-size:7px;fill:var(--t3);font-weight:600}
+.hb-dot{cursor:pointer;transition:transform .18s var(--m3-spring),fill .2s}
+.hb-dot:hover{transform:scale(1.25)}
+.hb-dot.on{animation:dotPop .35s cubic-bezier(.05,.7,.1,1)}
+@keyframes dotPop{from{transform:scale(.5)}to{transform:scale(1)}}
+.hb-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hb-swatch{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.hb-name{flex:1;min-width:0;padding:8px 10px!important;font-size:12px!important}
+.hb-x{border:none;background:transparent;color:var(--t3);cursor:pointer;font-size:18px;line-height:1;padding:4px}
+.hb-grid-scroll{overflow-x:auto;padding-bottom:6px}
+.hb-grid-table{display:inline-block;min-width:100%}
+.hb-g-row{display:flex;align-items:center;gap:2px;margin-bottom:3px}
+.hb-g-row.head .hb-g-cell{font-size:8px;color:var(--t3);font-weight:700;background:transparent;border:none;height:auto;min-width:14px}
+.hb-g-lab{width:110px;flex-shrink:0;font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:6px}
+.hb-g-cell{width:14px;height:14px;min-width:14px;border-radius:4px;border:1px solid var(--c4);background:var(--c3);cursor:pointer;padding:0;flex-shrink:0;transition:background .2s,transform .15s}
+.hb-g-cell.on{background:var(--c);border-color:transparent;transform:scale(1.05)}
+.hb-week-head,.hb-week-row{display:grid;grid-template-columns:1fr repeat(5,28px) 24px;gap:6px;align-items:center;margin-bottom:8px;font-size:11px}
+.hb-week-head{color:var(--t3);font-weight:700}
+.hb-week-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--c4);background:var(--c3);cursor:pointer;justify-self:center}
+.hb-week-dot.on{background:var(--c);border-color:transparent}
+.hb-month-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px;border-radius:14px;background:var(--c3)}
+.hb-month-item.on{background:var(--m3-primary-container)}
+.hb-month-item .task-inp{flex:1;min-width:0}
+@media (prefers-reduced-motion:reduce){.chart-box canvas,.chart-shell canvas,.site-row,.cat-bar-row,.hm-cell,.petal-fill,.bento-tile,.hb-dot,.chart-wave-flow svg{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.chart-box canvas{animation:none}}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.profile-actions .btn{flex:1;min-width:120px}
+.goal-hero{padding:22px!important}
+.goal-hero-top{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.goal-chip{display:inline-flex;align-items:center;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;background:var(--m3-tonal);color:var(--m3-primary)}
+.goal-chip.done{background:var(--m3-tertiary-container,var(--m3-primary-container));color:var(--m3-tertiary,var(--m3-primary))}
+.goal-chip.warn{background:var(--m3-secondary-container);color:var(--m3-secondary)}
+.goal-ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
+.goal-ring-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono),monospace;font-weight:700;font-size:20px;color:var(--m3-primary)}
+.goal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.goal-actions .btn{flex:1;min-width:140px}
+.goal-presets{display:flex;flex-wrap:wrap;gap:8px}
+.goal-preset{border:none;border-radius:999px;padding:10px 14px;font:inherit;font-size:12px;font-weight:700;background:var(--c3);color:var(--t2);cursor:pointer;transition:transform .18s var(--m3-spring),background .2s,color .2s}
+.goal-preset:hover{color:var(--t1);transform:translateY(-1px)}
+.goal-preset.on{background:var(--m3-primary);color:var(--m3-on-primary)}
+.goal-check{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:16px;background:var(--c3);margin-bottom:8px;font-size:13px}
+.goal-check .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--c4);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.goal-check.on .dot{background:var(--m3-primary);border-color:var(--m3-primary);color:var(--m3-on-primary);font-size:11px;font-weight:800}
+.goal-check.on{background:var(--m3-primary-container)}
+.goal-week{display:flex;gap:8px;flex-wrap:wrap}
+.goal-day{width:36px;height:44px;border-radius:12px;background:var(--c3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.goal-day .gd{width:12px;height:12px;border-radius:50%;background:var(--c4)}
+.goal-day.win .gd{background:var(--m3-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--m3-primary) 22%,transparent)}
+.goal-day span{font-size:9px;font-weight:700;color:var(--t3)}
+.sb-notif-dot{width:8px;height:8px;border-radius:50%;background:var(--m3-primary);display:inline-block;margin-left:4px}
+@media (prefers-reduced-motion:reduce){.section.active,.fb,.theme-chip,.site-bar-f,.wavy-progress .wave-fill,.bento-wave path{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="sb-logo-row">
+        <div class="sb-logo-img m3-logo-wrap stt-logo-wrap" id="sb-logo" aria-hidden="true"><img class="m3-logo stt-logo" src="../icons/icon48.png" width="36" height="36" alt="" draggable="false" decoding="async" /></div>
+        <div>
+          <div class="sb-logo-name">Screen Time</div>
+          <div class="sb-logo-sub" id="sb-skin-lbl">Material You</div>
+        </div>
+      </div>
+      <div class="visual-theme-bar" id="visual-theme-bar" aria-label="Visual skin"></div>
+      <div class="theme-bar" id="theme-bar" aria-label="Theme colors"></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Overview</div>
+      <div class="sb-link active" data-section="dashboard"><span class="ic" data-ico="chart"></span>Overview</div>
+      <div class="sb-link" data-section="analytics"><span class="ic" data-ico="laptop"></span>Analytics</div>
+      <div class="sb-link" data-section="goals"><span class="ic" data-ico="trophy"></span>Goals</div>
+      <div class="sb-link" data-section="habits"><span class="ic" data-ico="list"></span>Habits</div>
+      <div class="sb-link" data-section="schedule"><span class="ic" data-ico="clock"></span>Schedule</div>
+      <div class="sb-link" data-section="streaks"><span class="ic" data-ico="flame"></span>Streaks</div>
+      <div class="sb-sec">Control</div>
+      <div class="sb-link" data-section="limits"><span class="ic" data-ico="block"></span>Limits</div>
+      <div class="sb-link" data-section="focus"><span class="ic" data-ico="lock"></span>Focus</div>
+      <div class="sb-link" data-section="cleaner"><span class="ic" data-ico="eye"></span>Cleaner</div>
+      <div class="sb-sec">Community</div>
+      <div class="sb-link" data-section="social"><span class="ic" data-ico="users"></span>Community</div>
+      <div class="sb-link" data-section="profile"><span class="ic" data-ico="cloud"></span>Profile</div>
+      <div class="sb-link" data-section="leaderboard"><span class="ic" data-ico="trophy"></span>Leaderboard</div>
+      <div class="sb-link" data-section="notifications"><span class="ic" data-ico="bell"></span>Alerts<span id="nav-notif-dot" hidden class="sb-notif-dot"></span></div>
+      <div class="sb-sec">Account</div>
+      <div class="sb-link" data-section="settings"><span class="ic" data-ico="list"></span>Settings</div>
+      <div class="sb-link" data-section="pro"><span class="ic" data-ico="trophy"></span>Pro</div>
+      <div class="sb-link" data-section="insights"><span class="ic" data-ico="bot"></span>Tips</div>
+    </nav>
+    <div class="sb-foot" id="sb-foot"></div>
+  </aside>
+
+  <main class="main">
+    <div class="dash-topbar" id="dash-topbar">
+      <nav class="dash-comm-nav" id="dash-comm-nav" aria-label="Community">
+        <button type="button" class="dash-comm-link" data-section="social" title="Community">
+          <span class="ic" data-ico="users" data-ico-size="15"></span>
+          <span class="dash-comm-lbl">Community</span>
+        </button>
+        <button type="button" class="dash-comm-link" data-section="profile" title="Profile">
+          <span class="ic" data-ico="cloud" data-ico-size="15"></span>
+          <span class="dash-comm-lbl">Profile</span>
+        </button>
+        <button type="button" class="dash-comm-link" data-section="leaderboard" title="Leaderboard">
+          <span class="ic" data-ico="trophy" data-ico-size="15"></span>
+          <span class="dash-comm-lbl">Leaderboard</span>
+        </button>
+        <button type="button" class="dash-comm-link" data-section="notifications" title="Alerts">
+          <span class="ic" data-ico="bell" data-ico-size="15"></span>
+          <span class="dash-comm-lbl">Alerts</span>
+          <span class="dash-comm-badge" id="top-nav-notif-badge" hidden>0</span>
+        </button>
+      </nav>
+      <div class="dash-topbar-spacer"></div>
+      <div class="dash-topbar-actions">
+        <div class="stt-top-plan" id="stt-top-plan" aria-live="polite"></div>
+        <div class="stt-pro-watermark" id="stt-pro-watermark" hidden title="Pro mode active">Pro mode</div>
+        <button type="button" class="stt-notif-bell" id="stt-notif-bell" aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
+          <span class="ic" data-ico="bell" data-ico-size="18"></span>
+          <span class="stt-notif-badge" id="stt-notif-badge" hidden>0</span>
+        </button>
+      </div>
+      <div class="stt-notif-panel" id="stt-notif-panel" hidden role="dialog" aria-label="Notifications">
+        <div class="stt-notif-panel-hd">
+          <strong>Notifications</strong>
+          <button type="button" class="btn" id="stt-notif-mark" style="width:auto;padding:6px 10px;font-size:11px">Mark read</button>
+        </div>
+        <div class="stt-notif-panel-list" id="stt-notif-panel-list"></div>
+      </div>
+    </div>
+    <div class="section active" id="section-dashboard">
+      <div class="usage-toolbar">
+        <div class="page-head">
+          <div class="pg-title">Overview</div>
+          <div class="pg-sub" id="dash-sub">Loading…</div>
+        </div>
+        <div class="filter-row" id="dash-filters">
+          <button class="fb active" data-days="1">Today</button>
+          <button class="fb" data-days="7">7 Days</button>
+          <button class="fb" data-days="30">30 Days</button>
+          <button class="fb" data-days="90">90 Days</button>
+        </div>
+      </div>
+      <div class="grid g4" id="dash-stats" style="margin-bottom:12px"></div>
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-hd">Focus score</div>
+          <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+            <div class="ring-pos focus-wavy-thin" id="dash-focus-ring" aria-hidden="true">
+              <div class="ring-center">
+                <div style="font-family:var(--font-mono),monospace;font-size:32px;font-weight:600;color:var(--m3-primary)" id="drg-num">—</div>
+                <div style="font-size:10px;color:var(--t3);font-weight:600" id="drg-lbl">—</div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:160px">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <div class="m3-blob" aria-hidden="true" style="width:36px;height:36px"></div>
+                <div style="font-size:11px;color:var(--t2);font-weight:600">Focus energy</div>
+              </div>
+              <div class="wavy-meter" id="dash-wavy-meter" style="--wavy-progress:0.5" aria-hidden="true">
+                <div class="wavy-rail"></div>
+                <div class="wavy-rail-dot"></div>
+                <div class="wavy-clip">
+                  <svg class="wavy-flow" viewBox="0 0 480 32" preserveAspectRatio="none">
+                    <path d="M0 16 Q30 4 60 16 T120 16 T180 16 T240 16 T300 16 T360 16 T420 16 T480 16"/>
+                  </svg>
+                </div>
+              </div>
+              <div id="score-meta" style="margin-top:10px;font-size:12px;color:var(--t2)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Categories</div>
+          <div style="display:flex;gap:14px;align-items:center">
+            <div id="dash-pie" class="chart-shell cat-wavy-host" style="width:140px;height:140px"></div>
+            <div class="pie-legend" id="dash-leg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-hd">Trend</div><div id="trend-wrap" class="chart-shell" style="height:160px"></div></div>
+        <div class="card"><div class="card-hd">Top Sites Activity Wave</div><div id="dash-sites"></div></div>
+      </div>
+      <div class="card" style="margin-top:14px" id="dash-insight-card">
+        <div id="dash-insight"></div>
+      </div>
+      <div class="card" style="margin-top:14px"><div class="card-hd">Today vs yesterday</div><div id="dash-compare" class="chart-shell"></div></div>
+      <div class="ov-viz-grid">
+        <div class="card"><div class="card-hd">Activity River</div><div id="dash-river" class="chart-shell" style="min-height:110px"></div></div>
+        <div class="card"><div class="card-hd">Focus vs Distraction</div><div id="dash-balance" class="chart-shell" style="min-height:110px"></div></div>
+        <div class="card"><div class="card-hd">Usage Rhythm</div><div id="dash-rhythm" class="chart-shell" style="min-height:110px"></div></div>
+      </div>
+    </div>
+
+    <div class="section" id="section-analytics">
+      <div class="usage-toolbar">
+        <div class="page-head">
+          <div class="pg-title">Analytics</div>
+          <div class="pg-sub">Deeper view of Overview metrics</div>
+        </div>
+        <div class="filter-row" id="ana-filters">
+          <button class="fb active" data-days="1">Today</button>
+          <button class="fb" data-days="7">7 Days</button>
+          <button class="fb" data-days="30">30 Days</button>
+          <button class="fb" data-days="90">90 Days</button>
+        </div>
+      </div>
+      <div id="ana-summary" class="ana-summary" hidden></div>
+      <div id="ana-bento" class="bento-grid"></div>
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card"><div class="card-hd">Daily trend</div><div id="ana-trend" class="chart-shell" style="height:220px"></div></div>
+        <div class="card"><div class="card-hd">Category petals</div><div id="ana-petal" class="chart-shell" style="min-height:280px"></div><div id="ana-petal-sites" style="margin-top:8px"></div></div>
+      </div>
+      <div class="ana-extra-grid">
+        <div class="card"><div class="card-hd">Activity Flow</div><div id="ana-flow" class="chart-shell" style="min-height:200px"></div></div>
+        <div class="card"><div class="card-hd">Session DNA</div><div id="ana-dna" class="chart-shell" style="min-height:120px"></div></div>
+        <div class="card"><div class="card-hd">Site Switching</div><div id="ana-switch" class="chart-shell" style="min-height:140px"></div></div>
+        <div class="card"><div class="card-hd">Focus Windows</div><div id="ana-windows" class="chart-shell" style="min-height:100px"></div></div>
+      </div>
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card"><div class="card-hd">Digital Fingerprint</div><div id="ana-fingerprint" class="chart-shell" style="min-height:260px"></div></div>
+        <div class="card"><div class="card-hd">Behavior Insights</div><div id="ana-behavior" class="behavior-insights"></div></div>
+      </div>
+      <div class="card" style="margin-bottom:14px"><div class="card-hd">Week compare</div><div id="week-compare" class="chart-shell"></div></div>
+      <details class="card ana-disclose" style="margin-bottom:14px" open>
+        <summary class="card-hd" style="cursor:pointer;list-style:none">All sites &amp; categories</summary>
+        <div class="grid g2" style="margin-top:12px">
+          <div>
+            <div class="card-hd">All sites</div>
+            <div class="sites-toolbar" id="ana-sites-toolbar"></div>
+            <div id="ana-sites"></div>
+          </div>
+          <div><div class="card-hd">Categories</div><div id="ana-cats"></div></div>
+        </div>
+      </details>
+      <details class="card ana-disclose" style="margin-top:0" open>
+        <summary class="card-hd" style="cursor:pointer;list-style:none">Heatmap · hour × day</summary>
+        <div class="pg-sub" style="margin:8px 0 12px;font-size:12px">Intensity by weekday and hour</div>
+        <div class="hmap-tools" id="hmap-tools"></div>
+        <div style="overflow-x:auto"><div id="hmap-full"></div></div>
+      </details>
+    </div>
+
+    <div class="section" id="section-goals">
+      <div class="pg-title">Goals</div>
+      <div class="pg-sub">Set a focus target · watch the ring fill today</div>
+
+      <div class="goal-hero card" id="goal-hero">
+        <div class="goal-hero-top">
+          <div>
+            <div class="goal-chip" id="goal-status-chip">On track</div>
+            <div class="card-hd" style="margin:10px 0 4px">Today’s focus</div>
+            <div class="hero-metric" id="goal-focus-val" style="font-size:34px">—</div>
+            <div id="goal-coach" style="font-size:13px;color:var(--t2);margin-top:6px;max-width:340px">Pick a target and start Focus mode.</div>
+            <div id="goal-vibe" class="goal-vibe" style="font-size:12px;color:var(--t3);margin-top:8px;max-width:340px;line-height:1.4"></div>
+          </div>
+          <div class="goal-ring-wrap" aria-hidden="true">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="44" fill="none" stroke="var(--m3-primary-container)" stroke-width="9"/>
+              <circle id="goal-ring" cx="55" cy="55" r="44" fill="none" stroke="var(--m3-primary)" stroke-width="9"
+                stroke-linecap="round" transform="rotate(-90 55 55)" stroke-dasharray="276.5" stroke-dashoffset="138"/>
+            </svg>
+            <div class="goal-ring-lbl" id="goal-pct">0%</div>
+          </div>
+        </div>
+        <div class="wavy-meter" id="goal-wavy" style="--wavy-progress:0.4;margin-top:16px" aria-hidden="true">
+          <div class="wavy-rail"></div><div class="wavy-rail-dot"></div>
+          <div class="wavy-clip"><svg class="wavy-flow" viewBox="0 0 480 32" preserveAspectRatio="none"><path d="M0 16 Q30 4 60 16 T120 16 T180 16 T240 16 T300 16 T360 16 T420 16 T480 16"/></svg></div>
+        </div>
+        <div class="goal-actions">
+          <button class="btn primary" id="goal-start-focus" type="button">Start Focus mode</button>
+          <button class="btn" id="goal-open-limits" type="button">Tune limits</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-hd" style="margin-bottom:8px">Quick presets</div>
+        <div class="goal-presets" id="goal-presets">
+          <button type="button" class="goal-preset" data-focus="60" data-social="90">Light · 60m</button>
+          <button type="button" class="goal-preset" data-focus="90" data-social="60">Deep · 90m</button>
+          <button type="button" class="goal-preset on" data-focus="120" data-social="60">Balanced · 2h</button>
+          <button type="button" class="goal-preset" data-focus="180" data-social="45">Marathon · 3h</button>
+          <button type="button" class="goal-preset" data-focus="240" data-social="30">Monk · 4h</button>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:14px">
+        <div class="card">
+          <div class="card-hd">Daily targets</div>
+          <div class="srow"><div class="srow-lbl">Focus target</div><span class="sl-val" id="goal-mins-lbl">120m</span></div>
+          <input type="range" class="sl" id="goal-mins" min="30" max="480" step="15" value="120"/>
+          <div class="srow" style="margin-top:12px"><div class="srow-lbl">Max social</div><span class="sl-val" id="goal-social-lbl">60m</span></div>
+          <div id="goal-social-meta" style="font-size:12px;color:var(--t3);margin:4px 0 6px"></div>
+          <div class="site-bar-w" style="height:8px"><div class="site-bar-f" id="goal-social-bar" style="width:20%"></div></div>
+          <input type="range" class="sl" id="goal-social" min="15" max="240" step="15" value="60"/>
+          <div class="srow" style="margin-top:12px"><div class="srow-lbl">Max entertainment</div><span class="sl-val" id="goal-ent-lbl">120m</span></div>
+          <div id="goal-ent-meta" style="font-size:12px;color:var(--t3);margin:4px 0 6px"></div>
+          <div class="site-bar-w" style="height:8px"><div class="site-bar-f" id="goal-ent-bar" style="width:20%;background:var(--m3-secondary)"></div></div>
+          <input type="range" class="sl" id="goal-ent" min="30" max="360" step="15" value="120"/>
+        </div>
+        <div class="card">
+          <div class="card-hd">Checklist</div>
+          <div id="goal-checklist"></div>
+          <div class="card-hd" style="margin-top:14px">Week wins</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Lit dots = focus goal cleared that day</div>
+          <div class="goal-week" id="goal-week"></div>
+          <div id="goal-week-meta" style="font-size:12px;color:var(--t3);margin-top:8px"></div>
+          <div id="goal-tip" style="font-size:12px;color:var(--t2);margin-top:12px;line-height:1.45"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-habits">
+      <div class="pg-title">Habit Tracker</div>
+      <div class="pg-sub"><span id="hb-month-lbl">this month</span> · tap a day to check off</div>
+      <div class="hb-head-actions">
+        <button class="btn primary hb-add-habit" id="hb-add-habit-top" type="button">Add habit</button>
+        <span class="hb-max-hint" id="hb-max-hint" aria-live="polite">8 habit max</span>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">This month</div>
+        <div class="hb-grid-tip" id="hb-grid-tip" hidden>Tap a square to mark a day done.</div>
+        <div id="hb-grid" class="hb-grid-scroll"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">Progress</div>
+        <div class="pg-sub" id="hb-progress-sub" style="margin:0 0 10px;font-size:12px">Habits done each day this month</div>
+        <div class="chart-shell" style="height:200px"><canvas id="hb-progress-chart"></canvas></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">Radial tracker</div>
+        <div class="pg-sub" id="hb-radial-sub" style="margin:0 0 12px;font-size:12px">Each ring is a habit · tap a day to mark</div>
+        <div class="hb-ring-layout">
+          <div id="hb-ring" class="hb-ring-host"></div>
+          <div>
+            <div class="card-hd" style="margin-bottom:8px">Daily habits</div>
+            <div id="hb-daily-list"></div>
+            <button class="btn primary hb-add-habit" id="hb-add-habit" type="button" style="width:100%;margin-top:10px">Add habit</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">Month summary</div>
+        <div class="pg-sub" style="margin:0 0 10px;font-size:12px">Set a target for each habit.</div>
+        <div id="hb-summary"></div>
+      </div>
+    </div>
+
+    <div class="section" id="section-schedule">
+      <div class="pg-title">Schedule</div>
+      <div class="pg-sub">When Focus Mode should auto-enable</div>
+      <div class="card" style="max-width:560px">
+        <div class="srow"><div><div class="srow-lbl">Enable schedule</div><div class="srow-sub">Auto focus during work hours</div></div><button class="toggle" id="sch-tog" type="button"><div class="tthumb"></div></button></div>
+        <div class="grid g2" style="margin-top:12px">
+          <div><div class="card-hd">Start</div><input class="task-inp" id="sch-start" type="time" value="09:00"/></div>
+          <div><div class="card-hd">End</div><input class="task-inp" id="sch-end" type="time" value="17:00"/></div>
+        </div>
+        <div class="card-hd" style="margin-top:16px">Active days</div>
+        <div class="filter-row" id="sch-days">
+          <button type="button" class="fb" data-d="1">Mon</button>
+          <button type="button" class="fb" data-d="2">Tue</button>
+          <button type="button" class="fb" data-d="3">Wed</button>
+          <button type="button" class="fb" data-d="4">Thu</button>
+          <button type="button" class="fb" data-d="5">Fri</button>
+          <button type="button" class="fb" data-d="6">Sat</button>
+          <button type="button" class="fb" data-d="0">Sun</button>
+        </div>
+        <button class="btn primary" id="sch-save" style="margin-top:16px;width:100%">Save schedule</button>
+      </div>
+    </div>
+
+    <div class="section" id="section-streaks">
+      <div class="pg-title">Streaks</div>
+      <div class="pg-sub">Current run · best · focus / limits / score</div>
+      <div class="grid g2" id="streak-overall"></div>
+      <div class="grid g3" id="streak-cards" style="margin-top:14px"></div>
+      <div class="card" style="margin-top:14px"><div class="card-hd">Recent wins</div><div id="streak-list"></div></div>
+    </div>
+
+    <div class="section" id="section-limits">
+      <div class="pg-title">Limits</div>
+      <div class="pg-sub">Cap time on sites and categories — one clear rule each</div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-hd">Daily site limits</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Minutes allowed per domain each day</div>
+          <div class="task-row"><input class="task-inp" id="d-slimit-domain" placeholder="youtube.com"/><input class="task-inp" id="d-slimit-mins" type="number" value="60" style="width:72px" title="minutes"/><button class="task-add-btn" id="d-slimit-add" type="button" aria-label="Add site limit">+</button></div>
+          <div id="d-site-limits" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Quick session caps</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Short burst limit — resets each day</div>
+          <div class="task-row"><input class="task-inp" id="d-scap-domain" placeholder="instagram.com"/><input class="task-inp" id="d-scap-mins" type="number" value="15" style="width:72px" title="minutes"/><button class="task-add-btn" id="d-scap-add" type="button" aria-label="Add session cap">+</button></div>
+          <div id="d-session-caps" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Path patterns</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Block a specific path, not the whole site</div>
+          <div class="task-row"><input class="task-inp" id="d-pattern-inp" placeholder="youtube.com/shorts"/><button class="task-add-btn" id="d-pattern-add" type="button" aria-label="Add pattern">+</button></div>
+          <div id="d-pattern-list" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Category budgets</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Daily caps for social &amp; entertainment</div>
+          <div class="srow"><div class="srow-lbl">Social max</div><span class="sl-val" id="d-sl-sv">60m</span></div>
+          <input type="range" class="sl" id="d-sl-social" min="15" max="240" step="15" value="60"/>
+          <div class="srow" style="margin-top:10px"><div class="srow-lbl">Entertainment max</div><span class="sl-val" id="d-sl-ev">120m</span></div>
+          <input type="range" class="sl" id="d-sl-ent" min="30" max="360" step="30" value="120"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-focus">
+      <div class="pg-title">Focus</div>
+      <div class="pg-sub">Arm blocking now — or on a schedule</div>
+      <div class="grid g2">
+        <div class="card focus-primary-card">
+          <div class="card-hd">Focus mode</div>
+          <div class="pg-sub" style="margin:0 0 10px;font-size:12px">Turn on to enforce your blocked sites list</div>
+          <div class="srow"><div><div class="srow-lbl">Focus mode</div><div class="srow-sub">Block distractions while you work</div></div><button class="toggle" id="d-tog-focus" type="button" aria-label="Focus mode"><div class="tthumb"></div></button></div>
+          <div class="srow"><div><div class="srow-lbl">Follow schedule</div><div class="srow-sub">Auto-on during work hours (see Schedule)</div></div><button class="toggle" id="d-tog-schedule" type="button" aria-label="Follow schedule"><div class="tthumb"></div></button></div>
+          <div class="card-hd" style="margin-top:16px;font-size:12px;color:var(--t3)">Advanced</div>
+          <button class="btn danger" id="d-btn-nuclear" style="margin-top:8px;width:100%" type="button">Hard Lock (Pro)</button>
+          <div class="pg-sub" style="margin:8px 0 0;font-size:11px">Locks the web for a set time — use sparingly</div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Blocked sites</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Blocked only when Focus mode is on</div>
+          <div class="task-row"><input class="task-inp" id="d-bl-inp" placeholder="twitter.com"/><button class="task-add-btn" id="d-bl-add" type="button" aria-label="Add blocked site">+</button></div>
+          <div id="d-bl-tags" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Ignore list</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Never track these domains</div>
+          <div class="task-row"><input class="task-inp" id="d-ignore-inp" placeholder="never track…"/><button class="task-add-btn" id="d-ignore-add" type="button" aria-label="Add ignore">+</button></div>
+          <div id="d-ignore-list" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Pomodoro</div>
+          <div class="pg-sub" style="margin:0 0 8px;font-size:12px">Work / break lengths for focus sessions</div>
+          <div class="srow"><div class="srow-lbl">Work</div><span class="sl-val" id="d-pwv">25m</span></div>
+          <input type="range" class="sl" id="d-sl-pw" min="5" max="60" step="5" value="25"/>
+          <div class="srow" style="margin-top:10px"><div class="srow-lbl">Break</div><span class="sl-val" id="d-pbv">5m</span></div>
+          <input type="range" class="sl" id="d-sl-pb" min="3" max="30" step="1" value="5"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-cleaner">
+      <div class="pg-title">Cleaner</div>
+      <div class="pg-sub">Hide distracting feed pieces</div>
+      <div class="card" style="max-width:520px">
+        <div class="srow"><div><div class="srow-lbl">Distraction cleaner</div><div class="srow-sub">Shorts / Reels / Explore</div></div><button class="toggle" id="d-tog-cleaner" type="button"><div class="tthumb"></div></button></div>
+        <div class="srow"><div><div class="srow-lbl">Grayscale social</div><div class="srow-sub">Calm Material You mode</div></div><button class="toggle" id="d-tog-bw" type="button"><div class="tthumb"></div></button></div>
+        <div class="srow"><div><div class="srow-lbl">Live banner</div><div class="srow-sub">Show time on limited sites</div></div><button class="toggle" id="d-tog-banner" type="button"><div class="tthumb"></div></button></div>
+        <div class="srow"><div><div class="srow-lbl">Notifications</div></div><button class="toggle" id="d-tog-notif" type="button"><div class="tthumb"></div></button></div>
+        <div class="srow"><div><div class="srow-lbl">Ghost mode</div><div class="srow-sub">Pause tracking</div></div><button class="toggle" id="d-tog-ghost" type="button"><div class="tthumb"></div></button></div>
+      </div>
+    </div>
+
+    <div class="section" id="section-settings">
+      <div class="pg-title">Settings</div>
+      <div class="pg-sub">Look, data, day reset, backup</div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">Visual theme</div>
+        <div class="pg-sub" style="margin:0 0 10px;font-size:12px">Material You (default) or Editorial bold flat — opt-in</div>
+        <div class="visual-theme-bar" id="visual-theme-settings" aria-label="Visual skin"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-hd">Day reset hour</div>
+          <div class="srow"><div class="srow-lbl">Stats day starts at</div><input class="task-inp" id="d-reset-hour" type="number" min="0" max="23" value="0" style="width:72px;text-align:center"/></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Data</div>
+          <button class="btn" id="d-btn-exp" style="width:100%;margin-bottom:8px">Export JSON</button>
+          <button class="btn" id="d-btn-csv" style="width:100%;margin-bottom:8px">Export CSV</button>
+          <button class="btn" id="d-btn-imp" style="width:100%;margin-bottom:8px">Restore backup</button>
+          <input type="file" id="d-imp-file" accept="application/json,.json" hidden/>
+          <button class="btn danger" id="d-btn-clr" style="width:100%">Clear today’s data</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-profile">
+      <div class="pg-title">Profile</div>
+      <div class="pg-sub">Your page · thoughts · followers</div>
+      <div id="profile-panel"></div>
+    </div>
+
+    <div class="section" id="section-leaderboard">
+      <div class="pg-title">Leaderboard</div>
+      <div class="pg-sub">Signed-in members · Global · Region · By website</div>
+      <div class="lb-wrap" id="lb-wrap">
+        <div id="lb-gate" class="lb-gate-overlay" aria-hidden="true">
+          <div class="lb-gate-card">
+            <div class="card-hd">Sign in to see ranks</div>
+            <p>Member stats stay private until you join. Sign up free — you appear on the board with your real synced usage.</p>
+            <button class="btn primary" id="lb-signin" type="button">Sign in / Sign up</button>
+          </div>
+        </div>
+        <div id="lb-body" class="lb-body">
+          <div id="lb-you" class="card" style="margin-bottom:12px;display:none"></div>
+          <div class="filter-row" id="lb-filters">
+            <button class="fb active" data-scope="global">Global</button>
+            <button class="fb" data-scope="region">My region</button>
+            <button class="fb" data-scope="sites">By website</button>
+          </div>
+          <div class="filter-row" id="lb-periods" style="margin-top:8px" aria-label="Time period"></div>
+          <div id="lb-criteria" class="lb-criteria">Ranked by total tracked time · Focus Score &amp; streak shown for context</div>
+          <div class="filter-row" id="lb-regions" style="margin-top:8px;display:none"></div>
+          <div id="lb-site-detail" class="card" style="margin-bottom:12px;display:none"></div>
+          <div class="card"><div id="lb-list"><div style="color:var(--t3);font-size:13px;padding:12px">Loading ranks…</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-social">
+      <div class="social-top">
+        <div class="social-top-row">
+          <div>
+            <div class="pg-title">Community</div>
+            <div class="social-signed" id="social-signed" aria-live="polite"></div>
+          </div>
+        </div>
+        <nav class="social-segs" id="social-segs" aria-label="Community sections" hidden>
+          <button type="button" class="social-seg on" data-social-tab="feed">Feed</button>
+          <button type="button" class="social-seg" data-social-tab="discover">Discover</button>
+          <button type="button" class="social-seg" data-social-tab="requests">
+            Requests
+            <span class="social-seg-badge" id="social-req-badge" hidden>0</span>
+          </button>
+          <button type="button" class="social-seg" data-social-tab="messages">
+            Messages
+            <span class="social-seg-badge" id="social-msg-badge" hidden>0</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="card" id="social-guest" hidden>
+        <div class="card-hd">Join the community</div>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:12px">Sign in to follow people, share thoughts, and message.</div>
+        <button class="btn primary" id="social-signin" type="button">Sign in / Sign up</button>
+      </div>
+
+      <div id="social-main" class="social-layout" hidden>
+        <div class="social-primary">
+          <div class="social-pane" data-social-pane="feed">
+            <div class="card social-composer" style="margin-bottom:12px">
+              <div class="social-composer-row">
+                <div class="avatar-lg" id="social-compose-av" style="width:40px;height:40px;font-size:15px" aria-hidden="true">?</div>
+                <textarea id="social-compose" class="task-inp" rows="3" maxlength="500" placeholder="Share a thought…" aria-label="Share a thought"></textarea>
+              </div>
+              <div class="social-composer-foot">
+                <div class="char-count" id="social-char-count">0/500</div>
+                <button class="btn primary" id="social-post-btn" type="button">Post</button>
+              </div>
+            </div>
+            <div class="card">
+              <div id="social-feed" class="feed-stack"></div>
+            </div>
+          </div>
+
+          <div class="social-pane" data-social-pane="discover" hidden>
+            <div class="card">
+              <div class="card-hd">Discover</div>
+              <div class="social-search-bar task-row">
+                <input class="task-inp" id="social-search" type="search" placeholder="Search people by name or handle" aria-label="Search people" autocomplete="off"/>
+                <button class="social-search-btn" id="social-search-btn" type="button" aria-label="Search" title="Search">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/>
+                    <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div id="social-search-results" style="margin-bottom:12px"></div>
+              <div id="social-explore"></div>
+            </div>
+          </div>
+
+          <div class="social-pane" data-social-pane="requests" hidden>
+            <div class="card">
+              <div class="card-hd">Follow requests</div>
+              <div id="social-requests"></div>
+            </div>
+          </div>
+
+          <div class="social-pane" data-social-pane="messages" hidden>
+            <div class="card" id="social-chat-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+                <div class="card-hd" style="margin:0">Messages</div>
+                <button class="btn" type="button" id="social-chat-refresh" title="Refresh conversations">Refresh</button>
+              </div>
+              <div class="chat-hub" id="social-chat-hub">
+                <div class="chat-conv-list" id="social-chat-list" aria-label="Conversations"></div>
+                <div class="chat-pane" id="social-chat-pane" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="social-rail card" id="social-rail" aria-label="Discover people">
+          <div class="card-hd">Discover</div>
+          <div id="social-rail-explore"></div>
+        </aside>
+      </div>
+    </div>
+
+    <div id="stt-plan-sheet" class="stt-plan-sheet" role="dialog" aria-modal="true" aria-labelledby="stt-plan-sheet-title" hidden>
+      <div class="stt-plan-sheet-card" id="stt-plan-sheet-card"></div>
+    </div>
+
+    <div id="profile-sheet" class="profile-sheet" role="dialog" aria-modal="true" aria-label="User profile" hidden>
+      <div class="profile-sheet-card" id="profile-sheet-card"></div>
+    </div>
+
+    <div id="message-sheet" class="profile-sheet" role="dialog" aria-modal="true" aria-label="Messages" hidden>
+      <div class="profile-sheet-card chat-sheet" id="message-sheet-card"></div>
+    </div>
+
+    <div class="section" id="section-notifications">
+      <div class="pg-title">Alerts</div>
+      <div class="pg-sub">Friends, ranks, over-use awards, and feature tips</div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="card-hd" style="margin:0">Inbox</div>
+          <button class="btn" id="notif-mark-read" type="button">Mark all read</button>
+        </div>
+        <div id="notif-list"></div>
+      </div>
+    </div>
+
+    <div class="section" id="section-pro">
+      <div class="pg-title">Plans</div>
+      <div class="pg-sub" id="pro-sub">Start free. Step up to Pro when you want Hard Lock, longer history, and full sync.</div>
+      <div class="plan-grid" id="pro-plans"></div>
+      <div class="card" style="margin-top:14px">
+        <div class="card-hd">Checkout</div>
+        <p class="pro-pay-hint">Pay with <strong>PayPal</strong> (USD, tax included) or <strong>Razorpay</strong> (INR / UPI / card, GST included). Your email is filled in after sign-in.</p>
+        <div class="pro-pay-providers" id="pro-pay-provider" role="group" aria-label="Payment method">
+          <button type="button" class="pro-pay-btn active" data-provider="paypal" aria-pressed="true" title="PayPal (USD)">
+            <img src="../icons/pay/paypal.png" width="100" height="26" alt="PayPal" decoding="async" />
+          </button>
+          <button type="button" class="pro-pay-btn" data-provider="razorpay" aria-pressed="false" title="Razorpay (INR / UPI / card)">
+            <img src="../icons/pay/razorpay.svg" width="110" height="24" alt="Razorpay" decoding="async" />
+          </button>
+        </div>
+        <div class="pro-pay-secured">
+          <span>Secured by</span>
+          <span class="pay-chip"><img src="../icons/pay/paypal.png" width="70" height="18" alt="PayPal" decoding="async" /></span>
+          <span class="pay-chip"><img src="../icons/pay/razorpay.svg" width="80" height="16" alt="Razorpay" decoding="async" /></span>
+        </div>
+        <div class="pro-restore-row">
+          <button type="button" class="btn ghost" id="pro-restore">Restore purchase</button>
+          <span id="pro-checkout-msg" style="font-size:12px;color:var(--t3)"></span>
+        </div>
+      </div>
+      <details class="card pro-compare-details" id="pro-compare-wrap">
+        <summary>Compare Free vs Pro features</summary>
+        <div id="pro-compare" style="margin-top:10px"></div>
+      </details>
+    </div>
+
+    <div class="section" id="section-insights">
+      <div class="pg-title">Tips</div>
+      <div class="pg-sub">Personalised nudges</div>
+      <div class="grid g2">
+        <div class="card"><div class="card-hd">Report</div><div id="ins-report"></div></div>
+        <div class="card"><div class="card-hd">Suggestions</div><div id="ins-sugs"></div></div>
+        <div class="card" style="grid-column:1/-1"><div class="card-hd">Insights</div><div id="ins-list"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="../vendor/chart.umd.min.js"></script>
+<script type="module" src="../src/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto" data-mode="light" data-m3="expressive" data-surface="popup">
+<head>
+<meta charset="UTF-8"/>
+<title>Screen Time Tracker</title>
+<link rel="stylesheet" href="src/theme.css"/>
+<link rel="stylesheet" href="src/motion.css"/>
+<link rel="stylesheet" href="src/m3-expressive.css"/>
+<link rel="stylesheet" href="src/visual-editorial.css"/>
+<link rel="stylesheet" href="src/overview-premium.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+body{width:380px;min-height:540px;max-height:600px;display:flex;flex-direction:column;overflow:hidden;background:var(--c0);color:var(--t1)}
+/* Popup-scale wavy focus ring — classic ~96px footprint; dashboard stays 140px */
+html[data-surface="popup"] .ring-wrap{
+  width:96px;height:96px;
+}
+html[data-surface="popup"] .ring-wrap .focus-wavy-thin,
+html[data-surface="popup"] #pop-focus-ring.focus-wavy-thin{
+  width:96px;height:96px;
+  max-width:96px;max-height:96px;
+  overflow:hidden;
+}
+/* Force SVG to fill slot — renderFocusWavyThin still emits width/height="140" */
+html[data-surface="popup"] .ring-wrap .focus-wavy-svg,
+html[data-surface="popup"] #pop-focus-ring .focus-wavy-svg{
+  width:100%!important;height:100%!important;
+  max-width:100%;max-height:100%;
+  inset:0;display:block;
+}
+html[data-surface="popup"] .ring-wrap.is-live .focus-wavy-svg,
+html[data-surface="popup"] #pop-focus-ring.is-live .focus-wavy-svg{
+  animation:none;
+}
+html[data-surface="popup"] .focus-wavy-thin .focus-wavy-ring{
+  transform-origin:center; /* not 70px — host is scaled below 140 */
+}
+html[data-surface="popup"] #pop-focus-ring .ring-center{
+  inset:0;z-index:1;
+}
+html[data-surface="popup"] #pop-focus-ring .ring-num{font-size:20px}
+html[data-surface="popup"] #pop-focus-ring .ring-lbl{font-size:8px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-logo m3-logo-wrap stt-logo-wrap" id="hdr-logo" aria-hidden="true"><img class="m3-logo stt-logo" src="icons/icon32.png" width="32" height="32" alt="" draggable="false" decoding="async" /></div>
+  <div style="min-width:0;flex:1">
+    <div class="hdr-name">Screen Time</div>
+    <div class="hdr-sub" id="hdr-mood">Today’s focus</div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-dot" title="Live"></div>
+    <button class="hdr-btn" id="btn-refresh" title="Refresh" aria-label="Refresh"></button>
+    <button class="hdr-btn" id="btn-dash" title="Open dashboard"><span id="dash-ico"></span> Dashboard</button>
+  </div>
+</header>
+
+<div class="profile-strip" id="profile-strip" aria-label="Account"></div>
+
+<div class="visual-theme-bar" id="visual-theme-bar" aria-label="Visual skin"></div>
+<div class="theme-bar" id="theme-bar" aria-label="Theme colors"></div>
+
+<div class="ghost-banner" id="ghost-banner"><span id="ghost-ico"></span> Ghost mode — tracking paused</div>
+
+<div class="panels">
+  <div class="panel active" id="panel-usage">
+    <div class="filter-row" id="usage-filters">
+      <button class="f-btn active" data-days="1">Day</button>
+      <button class="f-btn" data-days="7">Week</button>
+      <button class="f-btn" data-days="30">Month</button>
+      <button class="f-btn" data-days="90">90d</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <div>
+          <div class="card-hd" style="margin-bottom:6px" id="usage-period-label">Today</div>
+          <div class="hero-metric" id="hero-total">—<small>total</small></div>
+        </div>
+        <div class="m3-blob" aria-hidden="true"></div>
+      </div>
+      <div class="overview-row">
+        <div class="ring-wrap">
+          <div class="ring-pos focus-wavy-thin" id="pop-focus-ring" aria-hidden="true">
+            <div class="ring-center">
+              <div class="ring-num" id="rn">—</div>
+              <div class="ring-lbl" id="rl">score</div>
+            </div>
+          </div>
+        </div>
+        <div class="mini-stats">
+          <div class="ms"><div class="ms-val" id="ms-sites">—</div><div class="ms-key">Sites</div></div>
+          <div class="ms"><div class="ms-val" id="ms-prod">—</div><div class="ms-key">Focus</div></div>
+          <div class="ms"><div class="ms-val" id="ms-social">—</div><div class="ms-key">Social</div></div>
+          <div class="ms"><div class="ms-val" id="ms-ent">—</div><div class="ms-key">Fun</div></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:11px;color:var(--t2);margin-bottom:6px;font-weight:600">Focus energy</div>
+        <div class="wavy-meter" id="wavy-wrap" style="--wavy-progress:0.5" aria-hidden="true">
+          <div class="wavy-rail"></div>
+          <div class="wavy-rail-dot"></div>
+          <div class="wavy-clip">
+            <svg class="wavy-flow" viewBox="0 0 480 32" preserveAspectRatio="none">
+              <path d="M0 16 Q30 4 60 16 T120 16 T180 16 T240 16 T300 16 T360 16 T420 16 T480 16"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px 14px">
+      <div class="card-hd" style="margin-bottom:4px">Live now</div>
+      <div id="live-bar"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Top sites</div>
+      <div class="site-list" id="usage-sites"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Trend</div>
+      <div id="usage-chart" class="chart-shell" style="height:118px"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-limits">
+    <div class="card">
+      <div class="card-hd">Focus mode</div>
+      <div class="srow">
+        <div><div class="srow-lbl">Block list</div><div class="srow-sub">Enforce blocked sites</div></div>
+        <button class="toggle off" id="tog-focus" type="button"><div class="tthumb"></div></button>
+      </div>
+      <div class="srow">
+        <div><div class="srow-lbl">Schedule</div><div class="srow-sub">Work hours only</div></div>
+        <button class="toggle off" id="tog-schedule" type="button"><div class="tthumb"></div></button>
+      </div>
+      <div class="task-row" style="margin-top:8px">
+        <input class="task-inp" id="bl-inp" placeholder="block domain…"/>
+        <button class="task-add-btn" id="bl-add" type="button">+</button>
+      </div>
+      <div class="blocked-wrap" id="bl-tags" style="margin-top:8px"></div>
+      <button class="dng-btn dng-red btn-saas" id="btn-nuclear" style="margin-top:12px" type="button">Hard Lock (Pro)</button>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Daily site limits</div>
+      <div class="task-row">
+        <input class="task-inp" id="slimit-domain" placeholder="youtube.com"/>
+        <input class="task-inp" id="slimit-mins" type="number" value="60" style="width:68px" title="minutes"/>
+        <button class="task-add-btn" id="slimit-add" type="button">+</button>
+      </div>
+      <div id="site-limits" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Quick session cap</div>
+      <div class="task-row">
+        <input class="task-inp" id="scap-domain" placeholder="instagram.com"/>
+        <input class="task-inp" id="scap-mins" type="number" value="15" style="width:68px"/>
+        <button class="task-add-btn" id="scap-add" type="button">+</button>
+      </div>
+      <div id="session-caps" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Path patterns</div>
+      <div class="task-row">
+        <input class="task-inp" id="pattern-inp" placeholder="youtube.com/shorts"/>
+        <button class="task-add-btn" id="pattern-add" type="button">+</button>
+      </div>
+      <div class="blocked-wrap" id="pattern-list" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Category budgets</div>
+      <div class="srow"><div class="srow-lbl">Social</div><span class="sl-val" id="sl-sv">60m</span></div>
+      <input type="range" class="sl" id="sl-social" min="15" max="240" step="15" value="60"/>
+      <div class="srow" style="margin-top:8px"><div class="srow-lbl">Entertainment</div><span class="sl-val" id="sl-ev">120m</span></div>
+      <input type="range" class="sl" id="sl-ent" min="30" max="360" step="30" value="120"/>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Cleaner</div>
+      <div class="srow">
+        <div><div class="srow-lbl">Hide Shorts / Reels</div></div>
+        <button class="toggle off" id="tog-cleaner" type="button"><div class="tthumb"></div></button>
+      </div>
+      <div class="srow">
+        <div><div class="srow-lbl">Grayscale social</div></div>
+        <button class="toggle off" id="tog-bw" type="button"><div class="tthumb"></div></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <button class="dng-btn dng-cyan btn-saas" id="btn-open-dash" type="button">Open full dashboard</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Popup tabs">
+  <div class="tab active" data-tab="usage">Usage</div>
+  <div class="tab" data-tab="limits">Limits</div>
+</nav>
+
+<script src="vendor/chart.umd.min.js"></script>
+<script type="module" src="src/popup.js"></script>
+</body>
+</html>

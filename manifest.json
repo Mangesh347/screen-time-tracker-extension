@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "Screen Time Tracker",
+  "version": "5.4.61",
+  "description": "Screen time with Material You, sync, Free/Pro, community, and focus tools.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "unlimitedStorage",
+    "alarms",
+    "notifications",
+    "idle",
+    "activeTab",
+    "identity",
+    "identity.email"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://*.supabase.co/*",
+    "https://screen-time-tracker-seven.vercel.app/*",
+    "https://www.googleapis.com/*",
+    "https://accounts.google.com/*"
+  ],
+  "oauth2": {
+    "client_id": "179379728844-5tq61kd6dj85mulki8oftakk37je16jr.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Screen Time Tracker"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["src/content.js"],
+    "run_at": "document_end"
+  }],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; worker-src 'self'"
+  },
+  "web_accessible_resources": [{
+    "resources": [
+      "icons/*"
+    ],
+    "matches": ["<all_urls>"]
+  }],
+  "externally_connectable": {
+    "matches": [
+      "https://screen-time-tracker-seven.vercel.app/*"
+    ]
+  }
+}

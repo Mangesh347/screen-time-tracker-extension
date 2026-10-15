@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><title>Blocked — Screen Time Tracker</title>
+<link rel="stylesheet" href="../src/theme.css"/>
+<link rel="stylesheet" href="../src/m3-expressive.css"/>
+<link rel="stylesheet" href="../src/visual-editorial.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  font-family:var(--font-ui, system-ui, sans-serif);
+  color:var(--t1);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  background:var(--c0);
+  background-image:radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--m3-secondary) 12%, transparent) 0, transparent 55%);
+}
+html[data-visual="minimal"] body{ background:#FFFFFF; background-image:none; }
+html[data-visual="minimal"][data-mode="dark"] body{ background:#000000; }
+.brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;color:var(--t1)}
+.brand-name{font-size:13px;font-weight:800;letter-spacing:.02em}
+.m3-logo-minimal-wrap{color:var(--t1)}
+.card{
+  background:var(--c2);
+  border:2px solid color-mix(in srgb, var(--m3-secondary) 35%, var(--c4));
+  border-radius:var(--radius-card, 20px);
+  padding:40px 36px;max-width:460px;width:100%;text-align:center;
+  box-shadow:var(--elev-3, 0 20px 60px rgba(0,0,0,.12));
+  animation:up .45s cubic-bezier(.22,1,.36,1);
+}
+html[data-visual="minimal"] .card{ border:1px solid currentColor; box-shadow:none; border-radius:8px; }
+html[data-visual="editorial"] .card{ box-shadow:0 3px 0 var(--t1); border:2px solid var(--t1); }
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.ico-wrap{width:64px;height:64px;margin:0 auto 22px;color:var(--m3-secondary);display:flex;align-items:center;justify-content:center}
+.ico-wrap svg{width:56px;height:56px}
+html[data-visual="minimal"] .ico-wrap{color:var(--t1)}
+h1{font-size:24px;font-weight:800;color:var(--m3-secondary);margin-bottom:8px;letter-spacing:-.3px;font-family:var(--font-display), var(--font-ui), system-ui, sans-serif}
+html[data-visual="minimal"] h1{color:var(--t1)}
+.site{font-size:14px;color:var(--t2);margin-bottom:12px}
+.site code{color:var(--m3-primary);font-family:var(--font-mono), monospace;font-size:13px}
+.reason{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:18px;font-weight:700}
+.timer{font-family:var(--font-mono), monospace;font-size:44px;font-weight:600;color:var(--m3-primary);margin-bottom:4px}
+.timer-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:22px}
+.prog-wrap{height:3px;background:var(--c4);border-radius:2px;overflow:hidden;margin-bottom:26px}
+html[data-visual="minimal"] .prog-wrap{background:transparent;border:1px solid currentColor}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--m3-primary),var(--m3-secondary));transition:width 1s linear}
+html[data-visual="minimal"] .prog-fill{background:currentColor}
+p{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:28px}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{padding:10px 22px;border-radius:var(--radius-squircle, 10px);font-family:var(--font-ui), system-ui, sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;border:none}
+.btn-back{background:var(--m3-primary);color:var(--m3-on-primary);box-shadow:var(--elev-2)}
+.btn-grace{background:var(--m3-primary-container);border:1px solid var(--m3-outline);color:var(--m3-on-primary-container)}
+.btn-unblock{background:var(--m3-secondary-container);border:1px solid color-mix(in srgb, var(--m3-secondary) 40%, transparent);color:var(--m3-secondary)}
+html[data-visual="minimal"] .btn-back{background:#000;color:#fff;box-shadow:none;border:1px solid #000}
+html[data-visual="minimal"][data-mode="dark"] .btn-back{background:#fff;color:#000;border-color:#fff}
+html[data-visual="minimal"] .btn-grace,
+html[data-visual="minimal"] .btn-unblock{background:transparent;color:inherit;border:1px solid currentColor}
+.btn-unblock:disabled{opacity:.35;cursor:not-allowed}
+@media (prefers-reduced-motion: reduce){.card{animation:none}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand"><div id="blocked-logo" class="m3-logo-wrap stt-logo-wrap" aria-hidden="true"><img class="m3-logo stt-logo" src="../icons/icon48.png" width="40" height="40" alt="" draggable="false" decoding="async" /></div><div class="brand-name">Screen Time Tracker</div></div>
+  <div class="ico-wrap" id="ico"></div>
+  <h1 id="title">Focus Mode Active</h1>
+  <div class="site">You tried to visit <code id="sn">this site</code></div>
+  <div class="reason" id="reason">Blocked by focus list</div>
+  <div class="timer" id="tm">05:00</div>
+  <div class="timer-lbl">cooldown remaining</div>
+  <div class="prog-wrap"><div class="prog-fill" id="pf" style="width:100%"></div></div>
+  <p id="copy">This site is blocked to keep you focused.<br/>Use this time to work on your tasks instead.</p>
+  <div class="btns">
+    <button class="btn btn-back" id="back-btn">Go Back</button>
+    <button class="btn btn-grace" id="grace-btn" style="display:none">+5 min grace</button>
+    <button class="btn btn-unblock" id="unblock-btn" disabled>Allow once</button>
+  </div>
+</div>
+<script type="module" src="../src/blocked.js"></script>
+</body>
+</html>

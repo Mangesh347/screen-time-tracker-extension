@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto" data-mode="light" data-m3="expressive" data-surface="welcome">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Welcome — Screen Time Tracker</title>
+<link rel="stylesheet" href="../src/theme.css"/>
+<link rel="stylesheet" href="../src/motion.css"/>
+<link rel="stylesheet" href="../src/m3-expressive.css"/>
+<link rel="stylesheet" href="../src/visual-editorial.css"/>
+<style>
+html[data-surface="welcome"] body{
+  width:auto!important;max-width:none!important;min-height:100vh;overflow:auto;
+  background:var(--c0)!important;color:var(--t1)!important;
+}
+.page{max-width:880px;margin:0 auto;padding:48px 24px 56px}
+.hero{text-align:center;margin-bottom:40px}
+.logo-row{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:20px}
+h1{font-size:34px;font-weight:700;letter-spacing:-.6px;line-height:1.15;margin-bottom:10px;color:var(--t1)}
+h1 span{color:var(--m3-primary)}
+.subtitle{font-size:15px;color:var(--t2);line-height:1.65;max-width:520px;margin:0 auto 24px}
+.cta{
+  display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border:none;border-radius:999px;
+  background:var(--m3-primary);color:var(--m3-on-primary);font:inherit;font-weight:700;font-size:14px;
+  cursor:pointer;text-decoration:none;
+  box-shadow:0 8px 24px color-mix(in srgb,var(--m3-primary) 32%,transparent);
+  transition:transform .2s var(--m3-spring,cubic-bezier(.34,1.3,.64,1));
+}
+.cta:hover{transform:scale(1.03)}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:36px}
+.feat{background:var(--c2);border-radius:28px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.04);animation:m3-rise .45s var(--m3-emph,cubic-bezier(.05,.7,.1,1)) both}
+.feat:nth-child(2){animation-delay:.05s}.feat:nth-child(3){animation-delay:.1s}
+.feat:nth-child(4){animation-delay:.15s}.feat:nth-child(5){animation-delay:.2s}.feat:nth-child(6){animation-delay:.25s}
+.feat-ico{width:44px;height:44px;border-radius:16px;display:grid;place-items:center;background:var(--m3-primary-container);color:var(--m3-on-primary-container);margin-bottom:12px}
+.feat-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.feat-desc{font-size:12px;color:var(--t2);line-height:1.55}
+.steps{background:var(--c2);border-radius:28px;padding:28px;margin-bottom:28px}
+.steps h2{font-size:18px;font-weight:700;text-align:center;margin-bottom:18px}
+.step{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.step-n{width:36px;height:36px;border-radius:18px;background:var(--m3-primary);color:var(--m3-on-primary);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.step-title{font-size:13px;font-weight:700}.step-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.demo-wave{max-width:420px;margin:18px auto 0}
+.footer{text-align:center;color:var(--t3);font-size:12px}
+.footer a{color:var(--m3-primary);text-decoration:none;font-weight:600}
+.theme-bar{justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.feat{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <div class="logo-row">
+      <div class="m3-logo-wrap stt-logo-wrap" id="welcome-logo" aria-hidden="true"><img class="m3-logo stt-logo" src="../icons/icon48.png" width="48" height="48" alt="" draggable="false" decoding="async" /></div>
+      <div style="text-align:left">
+        <div style="font-size:20px;font-weight:700">Screen Time Tracker</div>
+        <div style="font-size:11px;color:var(--m3-primary);font-weight:600">Material You · Fenwick Labs</div>
+      </div>
+    </div>
+    <div class="theme-bar" id="theme-bar" aria-label="Preview themes"></div>
+    <h1>Take back control of<br/>your <span>screen time</span></h1>
+    <p class="subtitle">Track habits, set limits, and build better digital routines — with expressive Material You themes and a continuously flowing focus wave.</p>
+    <a href="#" id="cta-dash" class="cta">Open Dashboard</a>
+    <div class="demo-wave">
+      <div class="wavy-meter" style="--wavy-progress:0.72" aria-hidden="true">
+        <div class="wavy-rail"></div><div class="wavy-rail-dot"></div>
+        <div class="wavy-clip"><svg class="wavy-flow" viewBox="0 0 480 32" preserveAspectRatio="none"><path d="M0 16 Q30 4 60 16 T120 16 T180 16 T240 16 T300 16 T360 16 T420 16 T480 16"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat"><div class="feat-ico" data-ico="clock"></div><div class="feat-title">Live Tracking</div><div class="feat-desc">Every active website is timed in real time with idle pause detection.</div></div>
+    <div class="feat"><div class="feat-ico" data-ico="globe"></div><div class="feat-title">Usage &amp; Limits</div><div class="feat-desc">Compact popup for Day/Week/Month filters plus site and session caps.</div></div>
+    <div class="feat"><div class="feat-ico" data-ico="bot"></div><div class="feat-title">Smart Insights</div><div class="feat-desc">Overuse patterns, focus score, and personalised tips on the dashboard.</div></div>
+    <div class="feat"><div class="feat-ico" data-ico="flame"></div><div class="feat-title">Goals &amp; Streaks</div><div class="feat-desc">Daily focus targets, social budgets, and streak cards that keep you honest.</div></div>
+    <div class="feat"><div class="feat-ico" data-ico="block"></div><div class="feat-title">Focus Mode</div><div class="feat-desc">Block distractions on a schedule — with Hard Lock for deep work (Pro).</div></div>
+    <div class="feat"><div class="feat-ico" data-ico="lock"></div><div class="feat-title">Private by Default</div><div class="feat-desc">Usage stays on your device unless you opt into signed-in sync/billing.</div></div>
+  </div>
+
+  <div class="steps">
+    <h2>Getting started</h2>
+    <div class="step"><div class="step-n">1</div><div><div class="step-title">Pin the extension</div><div class="step-sub">Open the Chrome puzzle menu and pin Screen Time Tracker.</div></div></div>
+    <div class="step"><div class="step-n">2</div><div><div class="step-title">Browse normally</div><div class="step-sub">Tracking starts immediately — no New Tab takeover.</div></div></div>
+    <div class="step"><div class="step-n">3</div><div><div class="step-title">Open the popup</div><div class="step-sub">Pick a theme chip, check Usage, then set Limits when you’re ready.</div></div></div>
+    <div class="step"><div class="step-n">4</div><div><div class="step-title">Open the dashboard</div><div class="step-sub">Full analytics, heatmap, goals, schedule, streaks, and Pro tools.</div></div></div>
+  </div>
+
+  <div class="footer">Local-first · Material You themes · <a href="#" id="foot-dash">Open Dashboard</a></div>
+</div>
+<script type="module" src="../src/welcome.js"></script>
+</body>
+</html>
