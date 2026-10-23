@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Screen Time Tracker",
-  "version": "5.4.61",
+  "version": "5.4.62",
   "description": "Screen time with Material You, sync, Free/Pro, community, and focus tools.",
   "permissions": [
     "tabs",
