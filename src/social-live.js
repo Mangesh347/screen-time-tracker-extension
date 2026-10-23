@@ -5,8 +5,8 @@
 import { CONFIG } from './config.js';
 import { log } from './logger.js';
 
-const SOFT_POLL_MS = 3000;
-const SOFT_POLL_WITH_RT_MS = 10000;
+const SOFT_POLL_MS = 30000;          // was 3 s: too much Supabase egress (2026-10-23)
+const SOFT_POLL_WITH_RT_MS = 60000;  // was 10 s; realtime pushes changes anyway
 
 function realtimeUrl(accessToken) {
   const base = (CONFIG.supabase?.url || '').replace(/^https/i, 'wss').replace(/\/$/, '');

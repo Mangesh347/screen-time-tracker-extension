@@ -81,9 +81,9 @@ let _lbSyncInFlight = false;
 let _lbSyncBackoffMs = 0;
 let _lbSyncFailStreak = 0;
 /** Soft rank poll while Leaderboard is open + tab visible (was 8s). */
-const LB_SOFT_REFRESH_MS = 2500;
+const LB_SOFT_REFRESH_MS = 30000;   // was 2.5 s: too much Supabase egress (2026-10-23)
 /** Calm poll only used if tab stays on LB but we want a slower fallback (hidden uses none). */
-const LB_CALM_REFRESH_MS = 8000;
+const LB_CALM_REFRESH_MS = 120000;  // was 8 s
 /** Debounce prompt profile upsert while watching ranks. */
 const LB_SYNC_DEBOUNCE_MS = 1500;
 const LB_SYNC_BACKOFF_MAX_MS = 12000;

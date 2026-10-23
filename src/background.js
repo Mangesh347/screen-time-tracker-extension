@@ -591,7 +591,10 @@ async function autoCloudSync({ force = false } = {}) {
   const d = await chrome.storage.local.get(['settings', 'stt_user']);
   if (!d.stt_user?.email) return { skipped: true, reason: 'guest' };
   const now = Date.now();
-  if (!force && now - _lastAutoSyncAt < 20_000) return { skipped: true, reason: 'throttle' };
+  // Egress diet (2026-10-23): each sync downloads and re-uploads the user's data, and Supabase blocked the project for
+  // going over the free egress quota. Background syncs now run at most every 15 min; a user action (force) still syncs
+  // at once but never more than once a minute.
+  if (now - _lastAutoSyncAt < (force ? 60_000 : 15 * 60_000)) return { skipped: true, reason: 'throttle' };
   if (_autoSyncInFlight) return _autoSyncInFlight;
   _autoSyncInFlight = (async () => {
     try {
@@ -1082,7 +1085,7 @@ try {
   chrome.alarms.create('stt-feature-nudge', { periodInMinutes: 24 * 60 });
   chrome.alarms.create('stt-guest-score', { periodInMinutes: 180 });
   // Auto cross-browser sync every minute while signed in (no dashboard open needed)
-  chrome.alarms.create('stt-light-sync', { periodInMinutes: 1 });
+  chrome.alarms.create('stt-light-sync', { periodInMinutes: 15 });
   chrome.alarms.create('stt-token-refresh', { periodInMinutes: 25 });
   chrome.alarms.onAlarm.addListener(async a => {
     try {
@@ -1125,7 +1128,7 @@ try {
       if (a.name === 'stt-light-sync') {
         await flush(true);
         await persistTrackingCheckpoint();
-        return autoCloudSync({ force: true });
+        return autoCloudSync();   // background: the 15-minute throttle applies
       }
       if (a.name === 'daily-summary-notify') return sendDailySummaryNotification();
       if (a.name === 'daily-report') {
@@ -1467,7 +1470,7 @@ try {
       }
       await scheduleReportAlarms();
       // Recreate 1-min sync alarm after update
-      chrome.alarms.create('stt-light-sync', { periodInMinutes: 1 });
+      chrome.alarms.create('stt-light-sync', { periodInMinutes: 15 });
       autoCloudSync({ force: true }).catch(() => {});
     } catch (e) {
       log.warn('onInstalled', e);
